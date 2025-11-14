@@ -1,4 +1,5 @@
 # Autonomous-Robotic-Arm-for-Warehouse-Logistics-Using-TinyML
+
 ## Introduction
 Modern warehouses require fast, reliable, and intelligent sorting systems to manage increasing demand. Traditional automated solutions are often expensive, power-hungry, and rely heavily on cloud connectivity, making them unsuitable for small-scale industries or secure in-house environments.
 This project presents a TinyML-powered autonomous robotic arm capable of detecting, classifying, and sorting boxes using only low-power microcontrollers and edge intelligence.
