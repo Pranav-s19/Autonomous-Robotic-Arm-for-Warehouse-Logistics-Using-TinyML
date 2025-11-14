@@ -14,7 +14,8 @@ The entire prototype has been developed using minimal resources and low-cost com
 
 ### 1. ESP32-CAM
 Captures images and performs TinyML classification (apple/mango) on-device using MobileNet.
-![ESP32-CAM](./images/esp32-cam.jpg)
+<img src="./images/esp32-cam.jpg" width="300">
+
 
 
 ### 2. ESP32 XIAO S3
