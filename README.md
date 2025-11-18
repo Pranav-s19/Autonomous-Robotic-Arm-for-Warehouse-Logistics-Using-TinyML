@@ -176,7 +176,7 @@ The ESP32 XIAO S3 handles all the decision-level features in the system. It read
 
 LDR sensors placed on the storage units. Each LDR tells whether the apple or mango storage space is empty or already filled with a box. Because LDR readings depend on light intensity, I added a 100kΩ variable resistor to each sensor so I can easily adjust their sensitivity. This ensures that the XIAO always receives accurate information, no matter the ambient lighting conditions.
 
-The use of two indicator LEDs—red(LED2) for the apple unit and yellow(LED1) for the mango unit, these LEDs turn on whenever their corresponding storage unit is full. This helps me quickly understand the status of each unit without checking the serial output, and it also makes the system more user-friendly during testing.
+The use of two indicator LEDs—Red(LED2) for the apple unit and Yellow(LED1) for the mango unit, these LEDs turn on whenever their corresponding storage unit is full. This helps me quickly understand the status of each unit without checking the serial output, and it also makes the system more user-friendly during testing.
 
 <img src="./images/Variable resistor.png"><ln/>
 
