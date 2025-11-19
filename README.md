@@ -15,17 +15,17 @@ The entire prototype has been developed using minimal resources and low-cost com
 - ESP32-CAM (AI Thinker)
 - ESP32 XIAO S3
 - Arduino Nano
-- 5V Stepper Motor (Base rotation)
-- MG945 Servo (Shoulder)
-- MG90S Servo (Elbow)
-- SG90 Servo (Gripper)
+- 5V Stepper Motor 
+- MG945 Servo 
+- MG90S Servo 
+- SG90 Servo 
 - LDR Sensors (x2)
 - 100kΩ Variable Resistors (x2)
-- Red LED (Apple storage indicator)
-- Yellow LED (Mango storage indicator)
-- 3mm Sunboard Sheet (Robotic arm body)
+- Red LED 
+- Yellow LED 
+- 3mm Sunboard Sheet
 - Jumper Wires
-- Breadboard / PCB
+- Breadboard (x2)
 - USB Data Cables
 - Power Supply (5V)
 
@@ -77,7 +77,7 @@ For the learning block, I selected Object Detection (Images).
 <img src="./images/create impulse.png " width="980 "><ln/>
 
 
-Then on the Image section, selected the color depth as “ Grayscale”.<br/>
+Then on the Image section, I selected the color depth as “ Grayscale”.<br/>
 Grayscale reduces memory usage and speeds up inference while still keeping enough features for classification.
 
 <img src="./images/grayscale.png" width="980 "><ln/>
@@ -190,8 +190,26 @@ The Arduino Nano is responsible for controlling the entire motion sequence of th
 
 <img src="./images/arm.png" width="980 "><ln/>
 
+The robotic arm used in this project is completely custom-built by hand using 3 mm sunboard sheets. Instead of relying on 3D printing or expensive mechanical parts, I designed, cut, and assembled the entire structure manually to keep the prototype lightweight, low-cost, and easy to modify. Each joint was carefully aligned to ensure smooth movement with the servos and stepper motor, making the arm both functional and practical for warehouse sorting tasks while maintaining full DIY flexibility.
+
+
+<img src="./images/robotic-arm-testing.gif" ><ln/>
+
 Based on which GPIO pin the ESP32 XIAO S3 activates, the Nano decides which predefined path to run. This lets the arm rotate to the correct pickup location, lower itself, grip the box, lift, and place it precisely in the correct storage unit before returning home. Each path is tuned to match the physical layout of the arm and the storage placement.
 
+<img src="./images/boxes.jpg" width="980 "><ln/>
 <img src="./images/pick-place-op.png" width="980 ">
 
 #### Code For Arduino Nano: [View Arduino Nano Code](code/arduino_nano.ino)
+
+### Future Updates & Improvements
+
+#### Improve Object Classification
+The current model works for two classes—apple and mango. In future versions, we can expand the system to classify more box types or detect different product categories, making the arm more versatile for real warehouse environments.
+
+#### Enhance Camera Pipeline & Lighting Control
+The detection accuracy can be further improved by upgrading the camera pipeline—such as using adaptive exposure or a higher-quality lens module. Automatic lighting adjustment can also be added so the ESP32-CAM dynamically manages brightness without requiring manual flash control.
+
+#### Replace LDR Sensors With More Reliable Options
+LDR sensors depend heavily on light intensity and require manual tuning through variable resistors. In future versions, we can replace them with more reliable sensors like IR proximity, break-beam, or ultrasonic sensors, which do not change with ambient lighting.
+Alternatively, the resistance tuning process can be automated using a digital potentiometer so the system self-adjusts based on environment conditions.
