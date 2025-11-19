@@ -1,5 +1,9 @@
 # Autonomous-Robotic-Arm-for-Warehouse-Logistics-Using-TinyML
 
+***Public Project Link:***  https://studio.edgeimpulse.com/public/827532/live
+
+***Project Demo Video:*** https://www.youtube.com/watch?v=fI1cnPdgFPI
+
 ## Introduction
 
 Modern warehouses require fast, reliable, and intelligent sorting systems to manage increasing demand. Traditional automated solutions are often expensive, power-hungry, and rely heavily on cloud connectivity, making them unsuitable for small-scale industries or secure in-house environments.
@@ -15,7 +19,7 @@ The entire prototype has been developed using minimal resources and low-cost com
 - ESP32-CAM (AI Thinker)
 - ESP32 XIAO S3
 - Arduino Nano
-- 5V Stepper Motor 
+- 28BYJ-48 Stepper Motor DC 5V  
 - MG945 Servo 
 - MG90S Servo 
 - SG90 Servo 
@@ -27,7 +31,9 @@ The entire prototype has been developed using minimal resources and low-cost com
 - Jumper Wires
 - Breadboard (x2)
 - USB Data Cables
-- Power Supply (5V)
+- Power Supply (5V 3A)
+- DC–DC Voltage Converter (5V → 3.3V)
+- LM2596S Buck Converter
 
 ## Software & Platforms
 
@@ -192,6 +198,98 @@ The Arduino Nano is responsible for controlling the entire motion sequence of th
 
 The robotic arm used in this project is completely custom-built by hand using 3 mm sunboard sheets. Instead of relying on 3D printing or expensive mechanical parts, I designed, cut, and assembled the entire structure manually to keep the prototype lightweight, low-cost, and easy to modify. Each joint was carefully aligned to ensure smooth movement with the servos and stepper motor, making the arm both functional and practical for warehouse sorting tasks while maintaining full DIY flexibility.
 
+```bash
+// --- Parallel Robotic Arm Control (Non-Blocking) ---
+
+if (buttonPressed1) {
+    unsigned long currentMillis = millis();
+
+    switch (stepState) {
+
+      // ---- STEP 0: Move Servo1 & Servo2 together ----
+      case 0:
+        if (currentMillis - previousMillis1 >= stepDelayServo1) {
+          previousMillis1 = currentMillis;
+          if (servo1Angle > 140) { servo1Angle--; servo1.write(servo1Angle); }
+        }
+        if (currentMillis - previousMillis2 >= stepDelayServo2) {
+          previousMillis2 = currentMillis;
+          if (servo2Angle > 155) { servo2Angle--; servo2.write(servo2Angle); }
+        }
+        if (servo1Angle == 140 && servo2Angle == 155) stepState++;
+        break;
+
+      // ---- STEP 1: Move Servo3 down ----
+      case 1:
+        if (currentMillis - previousMillis3 >= stepDelayServo3) {
+          previousMillis3 = currentMillis;
+          if (servo3Angle > 20) { servo3Angle--; servo3.write(servo3Angle); }
+          else stepState++;
+        }
+        break;
+
+      // ---- STEP 2: Servo2 adjusts for grip ----
+      case 2:
+        if (currentMillis - previousMillis2 >= stepDelayServo2) {
+          previousMillis2 = currentMillis;
+          if (servo2Angle < 175) { servo2Angle++; servo2.write(servo2Angle); }
+          else stepState++;
+        }
+        break;
+
+      // ---- STEP 3: Stepper rotates 90° ----
+      case 3:
+        if (currentMillis - previousMillisStepper >= interval) {
+          previousMillisStepper = currentMillis;
+          stepper.step(stepsPerRevolution / 4);
+          stepState++;
+        }
+        break;
+
+      // ---- STEP 4: Servo2 correction ----
+      case 4:
+        if (currentMillis - previousMillis2 >= stepDelayServo2) {
+          previousMillis2 = currentMillis;
+          if (servo2Angle > 155) { servo2Angle--; servo2.write(servo2Angle); }
+          else stepState++;
+        }
+        break;
+
+      // ---- STEP 5: Lift Servo3 back to 90° ----
+      case 5:
+        if (currentMillis - previousMillis3 >= stepDelayServo3) {
+          previousMillis3 = currentMillis;
+          if (servo3Angle < 90) { servo3Angle++; servo3.write(servo3Angle); }
+          else stepState++;
+        }
+        break;
+
+      // ---- STEP 6: Servo1 & Servo2 return together ----
+      case 6:
+        if (currentMillis - previousMillis1 >= stepDelayServo1) {
+          previousMillis1 = currentMillis;
+          if (servo1Angle < 180) { servo1Angle++; servo1.write(servo1Angle); }
+        }
+        if (currentMillis - previousMillis2 >= stepDelayServo2) {
+          previousMillis2 = currentMillis;
+          if (servo2Angle < 180) { servo2Angle++; servo2.write(servo2Angle); }
+        }
+        if (servo1Angle == 180 && servo2Angle == 180) stepState++;
+        break;
+
+      // ---- STEP 7: Stepper moves back to default ----
+      case 7:
+        if (currentMillis - previousMillisStepper >= interval) {
+          previousMillisStepper = currentMillis;
+          stepper.step(-stepsPerRevolution / 4);  
+        }
+        buttonPressed1 = false;     // Reset cycle
+        break;
+    }
+}
+```
+
+To control the robotic arm smoothly, I used a non-blocking, parallel-execution approach based on millis(), which allows all servos and the stepper motor to move in parallel. Instead of using delays, each motor runs on its own timed loop, coordinated by a simple state machine. This makes the arm move smoothly and simultaneously, similar to real industrial robotic arms.
 
 <img src="./images/robotic-arm-testing.gif" ><ln/>
 
@@ -201,6 +299,17 @@ Based on which GPIO pin the ESP32 XIAO S3 activates, the Nano decides which pred
 <img src="./images/pick-place-op.png" width="980 ">
 
 #### Code For Arduino Nano: [View Arduino Nano Code](code/arduino_nano.ino)
+
+### Power Supply
+
+The entire system is powered using a 5V 3A DC adapter, which provides sufficient current for the ESP32 modules, Arduino Nano, servos, and the stepper motor.
+To ensure each component receives the correct voltage, the following DC–DC converters are used:
+
+ **A LM2596S buck converter :**  Regulates a stable 5V supply for the robotic arm motors, preventing voltage drops when the servos and stepper motor draw higher current. 
+
+ **DC–DC Voltage Converter (5V → 3.3V) :**  Used to safely power low-voltage modules such as ESP32-CAM or ESP32-XIAO when needed.
+
+ <img src="./images/power-supply.png" width="980 ">
 
 ### Future Updates & Improvements
 
@@ -213,3 +322,15 @@ The detection accuracy can be further improved by upgrading the camera pipeline�
 #### Replace LDR Sensors With More Reliable Options
 LDR sensors depend heavily on light intensity and require manual tuning through variable resistors. In future versions, we can replace them with more reliable sensors like IR proximity, break-beam, or ultrasonic sensors, which do not change with ambient lighting.
 Alternatively, the resistance tuning process can be automated using a digital potentiometer so the system self-adjusts based on environment conditions.
+
+
+
+## Project Demo Video (click below to play)
+
+[![Watch the video ](https://img.youtube.com/vi/fI1cnPdgFPI/maxresdefault.jpg)](https://www.youtube.com/watch?v=fI1cnPdgFPI)
+
+
+### Conclusion
+
+This project demonstrates how low-cost microcontrollers and TinyML can be combined to build a fully autonomous warehouse sorting system without relying on cloud processing or expensive industrial hardware. By distributing tasks across the ESP32-CAM, ESP32 XIAO S3, and Arduino Nano, the system achieves reliable edge-based object detection, smart decision-making, and precise robotic arm control.
+
